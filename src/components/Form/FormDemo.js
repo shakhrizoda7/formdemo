@@ -1,108 +1,102 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Box, Button, Checkbox, FormControl, FormControlLabel, FormHelperText, FormLabel, InputLabel, MenuItem, Radio, RadioGroup, Select, Slider, TextField, Typography } from '@mui/material';
+import { Controller, useForm } from 'react-hook-form';
 
 export default function FormDemo() {
-  const [ text, setText ] = useState('');
-  const [ radio, setRadio ] = useState('');
-  const [ select, setSelect ] = useState('');
-  const [ check1, setCheck1 ] = useState(false);
-  const [ check2, setCheck2 ] = useState(false);
-  const [ date, setDate ] = useState('');
-  const [ slider, setSLider ] = useState(0);
+  const {register, formState: {errors}, handleSubmit, control} = useForm();
 
-  const [ textError, setTextError] = useState(false);
-  const [ radioError, setRadioError] = useState(false);
-  const [ selectError, setSelectError] = useState(false);
-  const [ checkError, setCheckError] = useState(false);
-  const [ dateError, setDateError] = useState(false);
-  const [ sliderError, setSLiderError] = useState(false);
-
-  const logValue = (e) => {
-    e.preventDefault();
-
-    setTextError(!text);
-    setRadioError(!radio);
-    setSelectError(!select);
-    setCheckError(!check1 && !check2);
-    setDateError(!date);
-    setSLiderError(slider === 0);
-
-    if(text && radio && select && (check1 || check2) && slider !== 0){
-      console.log(`${text}, ${radio}, ${select}, checkbox: ${check1}, ${check2}, ${slider}`);
-  
-      setText('');
-      setRadio('');
-      setSelect('');
-      setCheck1(false);
-      setCheck2(false);
-      setSLider(0);
-    }
+  const logValue = (data) => {
+    console.log(data);
   };
 
   return (
     <Box sx={{width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', py: 1, gap: 4}}>
         <Typography variant='h5'>Form Demo</Typography>
 
-        <Box component={'form'} sx={{width: '80%', display: 'flex', flexDirection: 'column', alignItems: 'start', gap: 3}} onSubmit={logValue}>
+        <Box component={'form'} sx={{width: '80%', display: 'flex', flexDirection: 'column', alignItems: 'start', gap: 3}} onSubmit={handleSubmit(logValue)}>
           {/* input */}
           <FormControl sx={{width: '100%'}}>
-            <TextField label="Text input" value={text} onChange={(e) => setText(e.target.value)} variant="outlined" size='small' error={textError} sx={{width: '100%'}}/>
-
-            {textError && <FormHelperText sx={{color: 'error.main'}}>Please select</FormHelperText>}
+            <TextField label="Text input" variant="outlined" size='small' sx={{width: '100%'}} error={!!errors.text} {...register('text', {required: 'Text required'})}/>
+            {errors.text && <Typography color={'error.main'} fontSize={'12px'}>{errors.text.message}</Typography>}
           </FormControl>
+
 
           {/* radio form */}
-          <FormControl error={radioError}>
-            <FormLabel id="demo-controlled-radio-buttons-group">Radio Input</FormLabel>
+          <FormControl>
+            <FormLabel id="demo-controlled-radio-buttons-group" >Radio Input</FormLabel>
 
-            <RadioGroup value={radio} onChange={(e) => setRadio(e.target.value)}>
-              <FormControlLabel value="Radio Option 1" control={<Radio />} label="Radio Option 1"/>
-              <FormControlLabel value="Radio Option 2" control={<Radio />} label="Radio Option 2" />
+            <RadioGroup>
+              <FormControlLabel value="Radio Option 1" control={<Radio />} label="Radio Option 1" {...register("radio", { required: "Please select an option" })}/>
+              <FormControlLabel value="Radio Option 2" control={<Radio />} label="Radio Option 2" {...register("radio", { required: "Please select an option" })}/>
             </RadioGroup>
 
-            {radioError && <FormHelperText>Please select</FormHelperText>}
+            {errors.radio && (
+              <FormHelperText sx={{ color: "error.main" }}>
+                {errors.radio.message}
+              </FormHelperText>
+            )}
           </FormControl>
+
 
           {/* dropdown input */}
-          <FormControl variant="standard" fullWidth error={selectError}>
+          <FormControl variant="standard" fullWidth>
             <InputLabel id="dropdown-label" style={{ color: "#ccc" }}> Dropdown Input </InputLabel>
 
-            <Select labelId="dropdown-label" value={select} onChange={(e) => setSelect(e.target.value)} inputProps={{ style: { borderBottom: "1px solid #ccc" }}}>
-              <MenuItem value='Select option 1'>Option 1</MenuItem>
-              <MenuItem value='Select option 2'>Option 2</MenuItem>
-              <MenuItem value='Select option 3'>Option 3</MenuItem>
-            </Select>
+            <Controller name='dropdown' defaultValue="Select option 1" control={control} rules={{ required: 'Please select an option'}} 
+              render={({field}) => (
+                <Select {...field} error={!!errors.dropdown} labelId="dropdown-label" inputProps={{ style: { borderBottom: "1px solid #ccc" }}}>
+                  <MenuItem value='Select option 1'>Select option 1</MenuItem>
+                  <MenuItem value='Select option 2'>Select option 2</MenuItem>
+                  <MenuItem value='Select option 3'>Select option 3</MenuItem>
+                </Select>
+            )} />
 
-            {selectError && <FormHelperText>Please select</FormHelperText>}
+            {errors.dropdown && <FormHelperText sx={{color: 'error.main'}}>{errors.dropdown.message}</FormHelperText>}
           </FormControl>
+
 
           {/* date input */}
           <Box width={'100%'}>
             <InputLabel htmlFor="dateInput" sx={{mb: 1}}>Date Input</InputLabel>
 
-            <TextField id='dateInput' type='date' size='small' value={date} onChange={(e) => setDate(e.target.value)} error={dateError}
+            <TextField id='dateInput' type='date' size='small' {...register('date', {required: 'Please select a date'})}
               sx={{ width: '100%', "& .MuiOutlinedInput-notchedOutline": { border: "none" }, "&:focus-within .MuiOutlinedInput-notchedOutline": { border: "none" }, borderBottom: '1px solid gray' }}
             />
 
-            {dateError && <FormHelperText sx={{color: 'error.main'}}>Please select a valid date.</FormHelperText> }
+            {errors.date && <FormHelperText sx={{color: 'error.main'}}>{errors.date.message}</FormHelperText>}
           </Box>
 
+
           {/* checkbox */}
-          <FormControl error={checkError}>
+          <FormControl>
             <FormLabel component="legend">Checkbox Input</FormLabel>
 
-            <FormControlLabel control={<Checkbox checked={check1} onChange={(e) => setCheck1(e.target.checked)}/>} label="Checkbox Option 1" />
-            <FormControlLabel control={<Checkbox checked={check2} onChange={(e) => setCheck2(e.target.checked)}/>} label="Checkbox Option 2" />
+            <FormControlLabel control={<Checkbox/>} label="Checkbox Option 1" {...register('checkbox', {required: 'At least one checkbox must be selected'})}/>
+            <FormControlLabel control={<Checkbox/>} label="Checkbox Option 2" {...register('checkbox', {required: 'At least one checkbox must be selected'})}/>
 
-            {checkError && <FormHelperText>Please select</FormHelperText>}
+            {errors.checkbox && (
+              <FormHelperText sx={{ color: 'error.main' }}>
+                {errors.checkbox.message}
+              </FormHelperText>
+            )}          
           </FormControl>
 
+
           {/* slider input */}
-          <FormControl sx={{width: '100%'}} error={sliderError}>
+          <FormControl sx={{width: '100%'}}>
             <Typography id="input-slider" gutterBottom> Slider input </Typography>
 
-            <Slider size="small" defaultValue={0} value={slider} onChange={(event, newvalue) => setSLider(newvalue)} />
-            {sliderError && <FormHelperText>Please select</FormHelperText>}
+            <Controller
+              name="slider"
+              control={control}
+              defaultValue={0}
+              rules={{ validate: (value) => value > 0 || "Please select a value" }}
+              render={({ field }) => (
+                <Slider {...field} size="small" value={field.value} onChange={(_, value) => field.onChange(value)}/>
+              )}
+            />
+
+            {errors.slider && <FormHelperText sx={{color: 'error.main'}}>{errors.slider.message}</FormHelperText>}
           </FormControl>
 
           <Button variant="contained" sx={{bgcolor: 'lightgray', color: 'black', width: '100%', mt: 5, ":hover": {bgcolor: 'gray'}}} type='submit'>submit</Button>

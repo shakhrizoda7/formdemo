@@ -3,20 +3,21 @@ import { Box, Button, Checkbox, FormControl, FormControlLabel, FormHelperText, F
 import { Controller, useForm } from 'react-hook-form';
 
 export default function FormDemo() {
-  const {register, formState: {errors}, handleSubmit, control} = useForm();
+  const {register, formState: {errors}, handleSubmit, control, reset} = useForm();
 
   const logValue = (data) => {
     console.log(data);
+    reset();
   };
 
   return (
-    <Box sx={{width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', py: 1, gap: 4}}>
+    <Box sx={{width: '100%', display: 'flex', alignItems: 'center', flexDirection: 'column', gap: 4}}>
         <Typography variant='h5'>Form Demo</Typography>
 
         <Box component={'form'} sx={{width: '80%', display: 'flex', flexDirection: 'column', alignItems: 'start', gap: 3}} onSubmit={handleSubmit(logValue)}>
           {/* input */}
           <FormControl sx={{width: '100%'}}>
-            <TextField label="Text input" variant="outlined" size='small' sx={{width: '100%'}} error={!!errors.text} {...register('text', {required: 'Text required'})}/>
+            <TextField label="Text input" variant="outlined" size='small' sx={{width: '100%'}} error={!!errors.text} {...register('text', {required: 'Text required', minLength: {value: 5, message: 'Text must be at least 5 characters long'}})}/>
             {errors.text && <Typography color={'error.main'} fontSize={'12px'}>{errors.text.message}</Typography>}
           </FormControl>
 
@@ -100,7 +101,6 @@ export default function FormDemo() {
           </FormControl>
 
           <Button variant="contained" sx={{bgcolor: 'lightgray', color: 'black', width: '100%', mt: 5, ":hover": {bgcolor: 'gray'}}} type='submit'>submit</Button>
-          <Button variant="outlined" sx={{border: '2px solid lightgray', color: 'black', width: '100%'}}>reset</Button>
         </Box>
     </Box>
   )
